@@ -1,0 +1,343 @@
+---
+title: "Covadonga-et-al-2022"
+author: "f.u."
+date: March 2022"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Algorithms and data description for Cell paper
+
+Reference: Covadonga et al. ...XXXX 
+
+
+## Main data structures
+
+Here we load and describe the main data structures used in the rest of the document.
+
+```{r}
+library(dplyr)
+library(tidyr)
+diffCounts <- read.csv("data/diffCounts.csv",
+                       stringsAsFactors=TRUE)
+diffCounts$percHuC <- 100*diffCounts$Huc / (diffCounts$Huc + diffCounts$noHuC)
+summary(diffCounts)
+diffCounts
+```
+
+```{r}
+percBoundTime <- diffCounts %>% group_by(bound,time) %>% 
+  summarise(percHuC = mean(percHuC), .groups = 'keep')
+percHuC_30 <- percBoundTime[percBoundTime$time=="30hpf", "percHuC"]$percHuC
+percHuC_48 <- percBoundTime[percBoundTime$time=="48hpf", "percHuC"]$percHuC
+boundaryColors = c("darkgray", "#5D9B90", "#48125E", "#c44b16")
+
+percNotch <- read.csv("data/percNotch.csv", stringsAsFactors = TRUE)
+percBoundTimeNotch <- percNotch %>% group_by(bound,time) %>%
+  summarise(percNotch = mean(percNotch, na.rm = TRUE), .groups = 'keep')
+summary(percNotch)
+percNotch
+```
+
+### For description of 2 groups
+
+```{r}
+  descr1 <- function(gr){
+    gr <- na.omit(gr)
+    return(list(N=length(gr), M=mean(gr, na.rm=TRUE), 
+                SD=sd(gr, na.rm = TRUE), SEM=sd(gr, na.rm = TRUE)/sqrt(length(gr))))
+  }
+
+descr2groups <- function(gr1, gr2, nams=NULL, tit = NULL, not.paired=TRUE){
+  # given array of two rows
+  tab <- rbind(unlist(descr1(gr1)), unlist(descr1(gr2)))
+  if (!is.null(nams)){
+    rownames(tab) <- nams}
+  pv <- t.test(gr1,gr2, paired= (!not.paired))$p.value
+  
+  if (!is.null(tit))
+    print(paste("   ", tit))
+  print(round(tab,2))
+  print(paste(" t.test p-value:", pv, ifelse(pv<0.001, " *** ", 
+                                        ifelse(pv<0.01, " ** ", 
+                                               ifelse(pv<0.05, " * ", "ns")))))
+}
+descr2cols <- function(df, not.paired=TRUE, nams = NULL, tit = NULL){
+  # given a 2 column data.frame or tibble
+  descr2groups(unlist(df[,1]), unlist(df[,2]), 
+               not.paired = not.paired, nams = nams, tit = tit)
+}
+```
+
+\newpage
+## Figure 2C
+
+Boxplot diff 30-48 hpf
+
+```{r fig.width=3,fig.height=5}
+b1 <- diffCounts[diffCounts$time=="30hpf","percHuC"]
+b2 <- diffCounts[diffCounts$time=="48hpf","percHuC"]
+
+boxplot(b1,b2, main = "", xlab = "", ylab = "% differentiated boundary cells",
+        ylim=c(0,100),
+        names =  c("30hpf", "48hpf"), col ="white",
+        boxwex=0.6)
+
+descr2groups(b1,b2, nams=c("30hpf", "48hpf"))
+```
+
+## Figure 2E
+
+Lineage tree
+
+## Figure 3B
+Lineage 2
+
+## Figure 3E
+number of cells along time
+
+## Figure 3H
+cell distance to ventr
+
+\newpage 
+## Figure 4C
+bp notch active 26-36
+
+```{r fig.width=3,fig.height=5}
+b1 <- percNotch$percNotch[percNotch$time=="26hpf"]
+b2 <- percNotch$percNotch[percNotch$time=="36hpf"]
+  
+boxplot(b1, b2, 
+        ylim=c(0,100),
+        main = "", xlab = "", 
+        ylab = "% Notch-active boundary cells",
+        names =  c("26hpf", "36hpf"), col ="white",
+        boxwex=0.4, outpch='.', cex=2)
+
+descr2groups(b1,b2, nams=c("26hpf", "36hpf"))
+```
+
+
+\newpage
+## Figure 4 I-J
+
+
+```{r}
+
+DMSO <- data.frame(
+         HuC = c(7L, 24L, 13L, 21L, 8L, 10L, 8L, 11L),
+       Total = c(113L, 132L, 151L, 88L, 125L, 133L, 165L, 101L))
+DMSO$percHuC <- DMSO$HuC/DMSO$Total*100
+DMSO
+
+
+LY <- data.frame(
+         HuC = c(71L, 122L, 82L, 99L, 79L, 142L, 104L, 112L),
+       Total = c(74L, 129L, 83L, 101L, 84L, 152L, 110L, 117L))
+LY$percHuC <- LY$HuC/LY$Total*100
+LY
+```
+
+
+```{r fig.width=3,fig.height=5}
+b1 <- DMSO$percHuC
+b2 <- DMSO$Total
+b3 <- LY$percHuC
+b4 <- LY$Total
+
+# fill colors
+rellcols <- c("white", "white")
+
+boxplot(b1,b3,
+        ylim = c(0,100),
+        ylab="% differentatiated cells",
+        names = c("DMSO", "LY411575"),
+        col = rellcols,
+        boxwex=0.4, outpch='.', cex=2)
+
+descr2groups(b1,b3, nams=c("DMSO", "LY411575"), not.paired = TRUE)
+```
+
+```{r fig.width=3,fig.height=5}
+maxRight <- 250
+
+boxplot(b2, b4,
+        ylim = c(0, maxRight),
+        ylab="number of cells",
+        names = c("DMSO", "LY411575"),
+        col = rellcols,
+        boxwex=0.4, outpch='.', cex=2)
+
+descr2groups(b2,b4, nams=c("DMSO", "LY411575"), not.paired = TRUE)
+```
+
+\newpage
+## Figure 7C
+
+```{r}
+diff4872 <- read.csv("data/diff4872.csv", stringsAsFactors=TRUE)
+diff4872
+```
+
+```{r fig.width=3,fig.height=5}
+
+b1 <- diff4872$percHuC[diff4872$time=="48hpf"]
+b2 <- diff4872$percHuC[diff4872$time=="72hpf"]
+  
+boxplot(b1, b2, ylim=c(0,100),
+        main = "", xlab = "", 
+        ylab = "% differentiated boundary cells",
+        names =  c("48hpf", "72hpf"), col ="white",
+        boxwex=0.6, outpch='.', cex=2)
+
+descr2groups(b1,b2, nams=c("48hpf", "72hpf"), not.paired = TRUE)
+```
+
+\newpage
+## Figure Sup3 A-B
+bp diff vs bound i 30-48
+
+```{r}
+diffCounts$percHuC <- 100*diffCounts$Huc/(diffCounts$Huc+diffCounts$noHuC)
+
+b1<- diffCounts %>% filter(time=="30hpf", bound=="r2r3")
+b2 <- diffCounts %>% filter(time=="48hpf", bound=="r2r3")
+b3<- diffCounts %>% filter(time=="30hpf", bound=="r3r4")
+b4 <- diffCounts %>% filter(time=="48hpf", bound=="r3r4")
+b5<- diffCounts %>% filter(time=="30hpf", bound=="r4r5")
+b6 <- diffCounts %>% filter(time=="48hpf", bound=="r4r5")
+b7<- diffCounts %>% filter(time=="30hpf", bound=="r5r6")
+b8 <- diffCounts %>% filter(time=="48hpf", bound=="r5r6")
+
+opar<-par(no.readonly = TRUE)
+par(bty="n")
+
+boundaryColors = c("darkgray", "#5D9B90", "#48125E", "#c44b16")
+altcols <- c(boundaryColors[1], "black", boundaryColors[2],
+                 "black", boundaryColors[3], "black", boundaryColors[4], "black" )
+
+boxplot(b1$percHuC, b2$percHuC, b3$percHuC, b4$percHuC, 
+        b5$percHuC, b6$percHuC, b7$percHuC, b8$percHuC,
+        ylab = "% differentiated boundary cells",
+        names =  rep(c("30hpf", "48hpf"),4),
+        col = c("white", boundaryColors[1], "white", boundaryColors[2],
+                 "white", boundaryColors[3], "white", boundaryColors[4] ),
+        boxcol= altcols, medcol = altcols, staplecol = altcols, 
+        whiskcol = altcols, outcol = altcols,
+        ylim=c(0,100),
+        boxwex=0.6
+        )
+mtext(text=c("r2r3","r3r4", "r4r5", "r5r6"), side=3, 
+      at=seq(1.5, 7.5, by=2), col=boundaryColors)
+
+par(opar)
+
+descr2groups(b1$percHuC,b2$percHuC, tit = "r2r3", nams=c("30hpf", "48hpf"))
+descr2groups(b3$percHuC,b4$percHuC, tit = "r3r4", nams=c("30hpf", "48hpf"))
+descr2groups(b5$percHuC,b6$percHuC, tit = "r4r5", nams=c("30hpf", "48hpf"))
+descr2groups(b7$percHuC,b8$percHuC, tit = "r5r6", nams=c("30hpf", "48hpf"))
+```
+
+```{r fig.width=3.6,fig.height=4}
+plot(0,0, type="n", xlab="", ylab="",
+     xlim=c(0.5,2.5), ylim=c(0,100),
+     xaxt="n", yaxt="n")
+points(x=rep(1,4), y=percHuC_30, pch=21,cex=2, bg=boundaryColors )
+points(x=rep(2,4), y=percHuC_48, pch=21,cex=2, bg=boundaryColors)
+
+axis(1, at=1:2, labels=c("30 hpf", "48 hpf"), cex.axis=1.6)
+axis(2, at=seq(0,100,by=20), labels = seq(0,100,by=20), las=2, cex.axis=1.6)
+
+legend(x="topleft",legend = levels(percBoundTime$bound), 
+       text.col=boundaryColors, cex=1.2, bty="n")
+```
+
+
+
+## Figure Sup3 C-D
+Ventric surfaces
+
+## Figure Sup3 E-F
+position alons DV and LM
+
+## Figure Sup 3 G
+Histo proliferating
+
+## Figure Sup 4 A-B 
+notch active vs bound and 26-36 hpf
+
+```{r}
+
+pw_percNotch <-pivot_wider(percNotch, names_from = c(time, bound), values_from = percNotch)
+
+opar<-par(no.readonly = TRUE)
+par(bty="n")
+
+boxplot(pw_percNotch[,c(2,6,3,7,4,8,5,9)],
+        ylab = "% Notch-active boundary cells",
+        names =  rep(c("26hpf", "36hpf"),4),
+        boxlty=rep(1,8),
+        col = c("white", boundaryColors[1], "white", boundaryColors[2],
+                 "white", boundaryColors[3], "white", boundaryColors[4] ),
+        boxcol= altcols, medcol = altcols, staplecol = altcols, 
+        whiskcol = altcols, outcol = altcols,
+        ylim=c(0,100),
+        boxwex=0.6
+        )
+
+mtext(text=c("r2r3","r3r4", "r4r5", "r5r6"), side=3, 
+      at=seq(1.5, 7.5, by=2), col=boundaryColors)
+par(opar)
+
+descr2cols(pw_percNotch[,c(2,6)], tit = "r2r3", nams=c("30hpf", "48hpf"))
+descr2cols(pw_percNotch[,c(3,7)], tit = "r3r4", nams=c("30hpf", "48hpf"))
+descr2cols(pw_percNotch[,c(4,8)], tit = "r4r5", nams=c("30hpf", "48hpf"))
+descr2cols(pw_percNotch[,c(5,9)], tit = "r5r6", nams=c("30hpf", "48hpf"))
+```
+
+
+
+```{r fig.width=3.6,fig.height=4}
+plot(NULL,NULL, type="n",
+     xlim=c(0.5,2.5), ylim=c(0,100),
+     xaxt="n", yaxt="n",
+     main= "",
+     xlab="", ylab="") #, ylab="% of Notch-active cells by boundary")
+points(x=ifelse(percBoundTimeNotch$time=="26hpf",1,2), 
+       y=percBoundTimeNotch$percNotch,
+       pch=21,cex=1.6,bg=rep(boundaryColors,each=2))
+
+legend(x="topleft",legend = levels(percBoundTime$bound), 
+       text.col=boundaryColors, cex=1.2, bty="n")
+axis(1,at=1:2,labels = c("26hpf","30hpf"), cex.axis=1.6)
+
+axis(2, at=seq(0,100,by=20), labels = seq(0,100,by=20), las=2, cex.axis=1.6)
+```
+
+
+## Figure Sup 5A
+bp number vs 48-72
+
+```{r fig.width=3,fig.height=5}
+
+tot48 <- diff4872$nCells[diff4872$time=="48hpf"]
+tot72 <- diff4872$nCells[diff4872$time=="72hpf"]
+
+boxplot(tot48, tot72, 
+        ylim = c(0,maxRight),
+        xlab="", ylab = "number of boundary cells", 
+        names = c("48hpf", "72hpf"),
+        col = rep("white",2),
+        boxwex=0.4, outpch='.', cex=2)
+
+# descripcion total number of cells
+descr2groups(tot48, tot72, nams = c("48hpf", "72hpf"), not.paired=TRUE)
+```
+
+
+
