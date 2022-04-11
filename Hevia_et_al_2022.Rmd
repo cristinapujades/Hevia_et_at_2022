@@ -12,7 +12,9 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Reference: Hevia et al. (2022) The neurogenic fate of the hindbrain boundaries relies on Notch3-dependent asymmetric cell divisions.
+## Reference
+
+#### Hevia et al. (2022) The neurogenic fate of the hindbrain boundaries relies on Notch3-dependent asymmetric cell divisions.
 
 # Main data structures
 
@@ -333,6 +335,51 @@ diff4872 <- read.csv("data/diff4872.csv", stringsAsFactors=TRUE)
 diff4872
 ```
 
+Data on differentiated BCP cells for figure 7F
+
+```{r}
+BCPdiff <- data.frame(
+Volum.colocalization.BCP.HuC = c(349941.69,674825.048,540146.442,
+                                       310148.821,228214.554,206442.811,431405.527),
+Volum.HuC.total = c(5885563.63,5911144.78,
+                      6345403.54,5908902.65,6034069.95,6127675.38,6114207.62),
+perc.colocalization = c(5.945763430647,
+                          11.41614819321,8.51240490214748,5.24883957937605,
+                          3.7820999075425,3.36902329509498,7.05578799105288)
+)
+rownames(BCPdiff) = c("E1", "E2", "E3", "E4", "E5", "E6", "E7")
+
+BCPdiff
+```
+
+Data on differentiated BCP cells for figure S6M
+
+```{r}
+gad1b <- data.frame(
+  volum.colocalization.BCP.plus.gad1b = c(78331.3964,100902.226,156688.351,
+                 128461.239,140192.32,96225.9263),
+  volum.gad1b.total = c(1075545.88,1109593.04,1264493.15,
+                 1502678.07,1525520.79,1467844.24),
+  perc.colocalization = c(7.28294328085753,9.09362463196417,
+                 12.3913957936427,8.54881970826925,9.18980068439448,6.55559518358706)
+)
+
+
+gad1b
+
+vglut2a <- data.frame(
+  volum.colocalization.BCP.plus.vglut2a = c(197080.231,256436.078,164943.557,
+                 72228.248,83761.2547,66543.6099),
+  volum.vglut2a.total = c(1735948.63,1640904.43,1950472.17,
+                 1823985.65,1837058.62,1830909.55),
+  perc.colocalization = c(11.3528838120054,15.6277278134961,
+                 8.45659628150449,3.95991317146601,4.55953086026182,3.63445643177731)
+)
+
+
+vglut2a
+```
+
 ### For description of 2 groups
 
 ```{r}
@@ -369,13 +416,14 @@ descr2cols <- function(df, not.paired=TRUE, nams = NULL, tit = NULL){
 
 ## Figure 2C
 
-```{r fig.width=3,fig.height=5}
+```{r fig.width=3, fig.height=5}
 b1 <- diffCounts[diffCounts$time=="30hpf","percHuC"]
 b2 <- diffCounts[diffCounts$time=="48hpf","percHuC"]
 
+
 boxplot(b1,b2, main = "", 
-        xlab = "", ylab = "% differentiated boundary cells",
-        ylim=c(0,100),
+        xlab = "", ylab = "% differentiated boundary cells", las=1,
+        ylim=c(0,100), family = "Arial",
         names =  c("30hpf", "48hpf"), col ="white",
         boxwex=0.6)
 
@@ -471,7 +519,7 @@ plotLineageTree <- function(sortBy="", selTrackType=NULL, selPlfType=NULL){
 
 ```
 
-```{r, fig.height=9, fig.width=8}
+```{r fig.height=9, fig.width=8}
 
 plotLineageTree(selPlfType = c("PLF", "NPLF"))
 
@@ -702,7 +750,7 @@ plotAveDistNDvsProg <- function(plotND = TRUE){
 
 ```
 
-```{r  fig.height=7, fig.width=8}
+```{r fig.height=7, fig.width=8}
 
 plotAveDistNDvsProg()
 
@@ -714,7 +762,7 @@ plotAveDistNDvsProg()
 
 bp notch active 26-36
 
-```{r fig.width=3,fig.height=5}
+```{r fig.width=3, fig.height=5}
 b1 <- percNotch$percNotch[percNotch$time=="26hpf"]
 b2 <- percNotch$percNotch[percNotch$time=="36hpf"]
   
@@ -747,7 +795,7 @@ LY$percHuC <- LY$HuC/LY$Total*100
 LY
 ```
 
-```{r fig.width=3,fig.height=5}
+```{r fig.width=3, fig.height=5}
 b1 <- DMSO$percHuC
 b2 <- DMSO$Total
 b3 <- LY$percHuC
@@ -766,7 +814,7 @@ boxplot(b1,b3,
 descr2groups(b1,b3, nams=c("DMSO", "LY411575"), not.paired = TRUE)
 ```
 
-```{r fig.width=3,fig.height=5}
+```{r fig.width=3, fig.height=5}
 maxRight <- 250
 
 boxplot(b2, b4,
@@ -783,7 +831,7 @@ descr2groups(b2,b4, nams=c("DMSO", "LY411575"), not.paired = TRUE)
 
 ## Figure 7C
 
-```{r fig.width=3,fig.height=5}
+```{r fig.width=3, fig.height=5}
 
 b1 <- diff4872$percHuC[diff4872$time=="48hpf"]
 b2 <- diff4872$percHuC[diff4872$time=="72hpf"]
@@ -795,6 +843,39 @@ boxplot(b1, b2, ylim=c(0,100),
         boxwex=0.6, outpch='.', cex=2)
 
 descr2groups(b1,b2, nams=c("48hpf", "72hpf"), not.paired = TRUE)
+```
+
+\newpage
+
+## Figure 7L
+
+```{r fig.width=3, fig.height=5}
+
+boxplot(BCPdiff$perc.colocalization, main = "", 
+        xlab = "", ylab = "% differentiated boundary cells", las=1,
+        ylim=c(0,100), family = "Arial",
+        col ="white",
+        boxwex=0.6)
+
+# descr2groups(b1,b2, nams=c("30hpf", "48hpf"))
+```
+
+\newpage
+
+## Figure 7O
+
+```{r fig.width=3, fig.height=5}
+b1 <- gad1b$perc.colocalization
+b2 <- vglut2a$perc.colocalization
+
+
+boxplot(b1,b2, main = "", 
+        xlab = "", ylab = "% differentiated boundary cells", las=1,
+        ylim=c(0,100), family = "Arial",
+        names =  c("gad1b", "vglut2a"), col ="white",
+        boxwex=0.6,
+        outpch='.', cex=2)
+
 ```
 
 \newpage
@@ -841,7 +922,7 @@ descr2groups(b5$percHuC,b6$percHuC, tit = "r4r5", nams=c("30hpf", "48hpf"))
 descr2groups(b7$percHuC,b8$percHuC, tit = "r5r6", nams=c("30hpf", "48hpf"))
 ```
 
-```{r fig.width=3.6,fig.height=4}
+```{r fig.width=3.6, fig.height=4}
 plot(0,0, type="n", xlab="", ylab="",
      xlim=c(0.5,2.5), ylim=c(0,100),
      xaxt="n", yaxt="n")
@@ -923,11 +1004,11 @@ someCols = paletaCova(5)[1:4]
 
 ```
 
-```{r, all-sections, fig.height=6, fig.width=6, eval=TRUE}
+```{r all-sections, fig.height=6, fig.width=6, eval=TRUE}
 plotSectionY()
 ```
 
-```{r, figures-side, fig.show="hold", out.width="25%", eval=TRUE}
+```{r figures-side, fig.show="hold", out.width="25%", eval=TRUE}
 plotSectionY(plotOnly = someSecs39[1], singleColor = someCols[1], grayBg = "gray")
 plotSectionY(plotOnly = someSecs39[2], singleColor = someCols[2], grayBg = "gray")
 plotSectionY(plotOnly = someSecs39[3], singleColor = someCols[3], grayBg = "gray")
@@ -1036,7 +1117,7 @@ mav_paths <-
   }
 ```
 
-```{r, fig.width=8, fig.height=6}
+```{r fig.width=8, fig.height=6}
 
 mavCellPaths = mav_paths(cellPaths, mavSize = 3)
 
@@ -1045,7 +1126,7 @@ plotPosTrack(data=mavCellPaths[,progCells,],
 
 ```
 
-```{r, fig.width=8, fig.height=6}
+```{r fig.width=8, fig.height=6}
 plotPosTrack(data=mavCellPaths[,progCells,], what="x", 
              main="POSITION X, (lat/med/lat)", ave = TRUE)
 ```
@@ -1080,7 +1161,7 @@ numdivs$tot <- apply(numdivs[,2:4], 1, sum)
 numdivs
 ```
 
-```{r message=FALSE, fig.width=7,fig.height=3}
+```{r message=FALSE, fig.width=7, fig.height=3}
 # library(zoo)
 mav5numdivs <- zoo::rollmean(c(0,0,numdivs$tot,0,0),5)
 
@@ -1123,7 +1204,7 @@ descr2cols(pw_percNotch[,c(4,8)], tit = "r4r5", nams=c("30hpf", "48hpf"))
 descr2cols(pw_percNotch[,c(5,9)], tit = "r5r6", nams=c("30hpf", "48hpf"))
 ```
 
-```{r fig.width=3.6,fig.height=4}
+```{r fig.width=3.6, fig.height=4}
 plot(NULL,NULL, type="n",
      xlim=c(0.5,2.5), ylim=c(0,100),
      xaxt="n", yaxt="n",
@@ -1144,7 +1225,7 @@ axis(2, at=seq(0,100,by=20), labels = seq(0,100,by=20), las=2, cex.axis=1.6)
 
 ## Figure Sup 6A
 
-```{r fig.width=3,fig.height=5}
+```{r fig.width=3, fig.height=5}
 
 tot48 <- diff4872$nCells[diff4872$time=="48hpf"]
 tot72 <- diff4872$nCells[diff4872$time=="72hpf"]
@@ -1159,3 +1240,5 @@ boxplot(tot48, tot72,
 # descripcion total number of cells
 descr2groups(tot48, tot72, nams = c("48hpf", "72hpf"), not.paired=TRUE)
 ```
+
+
