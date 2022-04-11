@@ -335,7 +335,7 @@ diff4872 <- read.csv("data/diff4872.csv", stringsAsFactors=TRUE)
 diff4872
 ```
 
-Data on differentiated BCP cells for figure 7F
+Data on differentiated BCP cells for figure 7L
 
 ```{r}
 BCPdiff <- data.frame(
@@ -352,7 +352,7 @@ rownames(BCPdiff) = c("E1", "E2", "E3", "E4", "E5", "E6", "E7")
 BCPdiff
 ```
 
-Data on differentiated BCP cells for figure S6M
+Data on differentiated BCP cells for figure 7O
 
 ```{r}
 gad1b <- data.frame(
